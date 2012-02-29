@@ -311,6 +311,14 @@ void freewheel (int freewheel_starting, void *ignored_arg)
 {
         if( freewheel_starting ) {
                 snd_pcm_close( alsa_handle );
+                alsa_handle = 0;
+                // reset resampling parameters 
+                resample_mean = 1.0;
+                static_resample_factor = 1.0;
+                resample_lower_limit = 0.25;
+                resample_upper_limit = 4.0;
+                offset_differential_index = 0;
+                offset_integral = 0;
         } else {
                 alsa_handle = open_audiofd( alsa_device, 1, sample_rate, num_channels, period_size, num_periods);
                 if( alsa_handle == 0 )
