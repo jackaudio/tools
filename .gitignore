@@ -40,3 +40,9 @@ session_notify.o
 transport.o
 tw.o
 wait.o
+alsa_in
+alsa_out
+alsa_in-alsa_in.o
+alsa_out-alsa_out.o
+alsa_in-memops.o
+alsa-out-memops.o
