@@ -7,6 +7,7 @@
 #include <config.h>
 
 #include <jack/jack.h>
+#include <jack/session.h>
 
 char * my_name;
 
@@ -15,6 +16,23 @@ show_version (void)
 {
 	fprintf (stderr, "%s: JACK Audio Connection Kit version " VERSION "\n",
 		my_name);
+}
+
+void
+printf_name2uuid (jack_client_t* client, const char* pname)
+{
+	char *port_component = strchr( pname, ':' );
+	size_t csize = port_component - pname + 1;
+	char client_component[csize];
+	snprintf(client_component, csize, "%s", pname);
+
+	char *uuid = jack_get_uuid_for_client_name(client, client_component);
+	if (uuid && strcmp(uuid, "-1") != 0) {
+		printf("%s%s\n", uuid, port_component );
+	} else {
+		printf("%s\n",pname);
+	}
+	jack_free(uuid);
 }
 
 void
@@ -33,6 +51,7 @@ show_usage (void)
 	fprintf (stderr, "        -p, --properties      Display port properties. Output may include:\n"
 			 "                              input|output, can-monitor, physical, terminal\n\n");
 	fprintf (stderr, "        -t, --type            Display port type\n");
+	fprintf (stderr, "        -u, --uuid            Display uuid instead of client name (if available)\n");
 	fprintf (stderr, "        -h, --help            Display this help message\n");
 	fprintf (stderr, "        --version             Output version information and exit\n\n");
 	fprintf (stderr, "For more information see http://jackaudio.org/\n");
@@ -43,7 +62,7 @@ main (int argc, char *argv[])
 {
 	jack_client_t *client;
 	jack_status_t status;
-    jack_options_t options = JackNoStartServer;
+	jack_options_t options = JackNoStartServer;
 	const char **ports, **connections;
 	unsigned int i, j, k;
 	int skip_port;
@@ -53,6 +72,7 @@ main (int argc, char *argv[])
 	int show_total_latency = 0;
 	int show_properties = 0;
 	int show_type = 0;
+	int show_uuid = 0;
 	int c;
 	int option_index;
 	char* aliases[2];
@@ -67,6 +87,7 @@ main (int argc, char *argv[])
 		{ "total-latency", 0, 0, 'L' },
 		{ "properties", 0, 0, 'p' },
 		{ "type", 0, 0, 't' },
+		{ "uuid", 0, 0, 'u' },
 		{ "help", 0, 0, 'h' },
 		{ "version", 0, 0, 'v' },
 		{ 0, 0, 0, 0 }
@@ -79,7 +100,7 @@ main (int argc, char *argv[])
 		my_name ++;
 	}
 
-	while ((c = getopt_long (argc, argv, "s:AclLphvt", long_options, &option_index)) >= 0) {
+	while ((c = getopt_long (argc, argv, "s:AclLphvtu", long_options, &option_index)) >= 0) {
 		switch (c) {
 		case 's':
             server_name = (char *) malloc (sizeof (char) * strlen(optarg));
@@ -105,6 +126,9 @@ main (int argc, char *argv[])
 			break;
 		case 't':
 			show_type = 1;
+			break;
+		case 'u':
+			show_uuid = 1;
 			break;
 		case 'h':
 			show_usage ();
@@ -147,7 +171,11 @@ main (int argc, char *argv[])
 		}
 		if(skip_port) continue;
 
-		printf ("%s\n", ports[i]);
+		if (show_uuid) {
+			printf_name2uuid(client, ports[i]);
+		} else {
+			printf ("%s\n", ports[i]);
+		}
 
 		jack_port_t *port = jack_port_by_name (client, ports[i]);
 
@@ -164,9 +192,15 @@ main (int argc, char *argv[])
 		if (show_con) {
 			if ((connections = jack_port_get_all_connections (client, jack_port_by_name(client, ports[i]))) != 0) {
 				for (j = 0; connections[j]; j++) {
-					printf ("   %s\n", connections[j]);
+					printf("   ");
+					if (show_uuid) {
+						printf_name2uuid(client, connections[j]);
+					} else {
+						printf("%s\n", connections[j]);
+					}
+
 				}
-				free (connections);
+				jack_free (connections);
 			} 
 		}
 		if (show_port_latency) {
