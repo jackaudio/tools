@@ -52,6 +52,7 @@ show_usage (void)
 			 "                              input|output, can-monitor, physical, terminal\n\n");
 	fprintf (stderr, "        -t, --type            Display port type\n");
 	fprintf (stderr, "        -u, --uuid            Display uuid instead of client name (if available)\n");
+	fprintf (stderr, "        -U, --port-uuid       Display port uuid\n");
 	fprintf (stderr, "        -h, --help            Display this help message\n");
 	fprintf (stderr, "        --version             Output version information and exit\n\n");
 	fprintf (stderr, "For more information see http://jackaudio.org/\n");
@@ -73,6 +74,7 @@ main (int argc, char *argv[])
 	int show_properties = 0;
 	int show_type = 0;
 	int show_uuid = 0;
+	int show_port_uuid = 0;
 	int c;
 	int option_index;
 	char* aliases[2];
@@ -88,6 +90,7 @@ main (int argc, char *argv[])
 		{ "properties", 0, 0, 'p' },
 		{ "type", 0, 0, 't' },
 		{ "uuid", 0, 0, 'u' },
+		{ "port-uuid", 0, 0, 'U' },
 		{ "help", 0, 0, 'h' },
 		{ "version", 0, 0, 'v' },
 		{ 0, 0, 0, 0 }
@@ -100,7 +103,7 @@ main (int argc, char *argv[])
 		my_name ++;
 	}
 
-	while ((c = getopt_long (argc, argv, "s:AclLphvtu", long_options, &option_index)) >= 0) {
+	while ((c = getopt_long (argc, argv, "s:AclLphvtuU", long_options, &option_index)) >= 0) {
 		switch (c) {
 		case 's':
             server_name = (char *) malloc (sizeof (char) * strlen(optarg));
@@ -129,6 +132,9 @@ main (int argc, char *argv[])
 			break;
 		case 'u':
 			show_uuid = 1;
+			break;
+		case 'U':
+			show_port_uuid = 1;
 			break;
 		case 'h':
 			show_usage ();
@@ -178,8 +184,16 @@ main (int argc, char *argv[])
 		}
 
 		jack_port_t *port = jack_port_by_name (client, ports[i]);
+	
+                if (show_port_uuid) {
+                        char buf[64];
+                        jack_uuid_t uuid;
+                        jack_port_uuid (port, uuid);
+                        uuid_unparse (uuid, buf);
+                        printf ("	uuid: %s\n", buf);
+                }
 
-		if (show_aliases) {
+                if (show_aliases) {
 			int cnt;
 			int i;
 
