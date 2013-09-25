@@ -49,9 +49,11 @@ main (int argc, char *argv[])
 
 	/* then, get the internal client handle */
 	client_name = argv[1];
-	intclient = jack_internal_client_handle (client, client_name, &status);
-	if (status & JackFailure) {
-		fprintf (stderr, "client %s not found.\n", client_name);
+
+	if (jack_internal_client_handle (client, client_name, &status, intclient) != 0) {
+                if (status & JackFailure) {
+                        fprintf (stderr, "client %s not found.\n", client_name);
+                }
 		exit (2);
 	}
 
