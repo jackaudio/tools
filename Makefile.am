@@ -43,6 +43,7 @@ bin_PROGRAMS = jack_load \
 	       jack_midi_dump \
 	       jack_iodelay \
 	       jack_load_test \
+	       jack_property \
 	       $(JACK_TRANSPORT) \
 	       $(NETJACK_TOOLS)
 
@@ -55,6 +56,10 @@ endif
 
 AM_CFLAGS = -I.. $(JACK_CFLAGS) $(sndfile_cflags)
 AM_CXXFLAGS = -I.. $(JACK_CFLAGS) $(sndfile_cflags)
+
+jack_property_SOURCES = property.c
+jack_property_LDFLAGS = @OS_LDFLAGS@
+jack_property_LDADD = $(top_builddir)/libjack/libjack.la
 
 jack_connect_SOURCES = connect.c
 jack_connect_LDFLAGS = @OS_LDFLAGS@
