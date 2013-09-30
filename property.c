@@ -156,22 +156,17 @@ int main (int argc, char* argv[])
                 }
         }
 
-        if (delete_all) {
-
-                /* Don't need to be a JACK client to do this
-                   (or several other things, actually, but the
-                   need is hard to determine a priori).
-                 */
-
-                if (jack_remove_all_properties () == 0) {
-                        printf ("JACK metadata successfully delete\n");
-                        exit (0);
-                }
+        if ((client = jack_client_open ("jack-property", options, NULL)) == 0) {
+                fprintf (stderr, "Cannot connect to JACK server\n");
                 exit (1);
         }
 
-        if ((client = jack_client_open ("jack-property", options, NULL)) == 0) {
-                fprintf (stderr, "Cannot connect to JACK server\n");
+        if (delete_all) {
+
+                if (jack_remove_all_properties (client) == 0) {
+                        printf ("JACK metadata successfully delete\n");
+                        exit (0);
+                }
                 exit (1);
         }
 
@@ -196,7 +191,7 @@ int main (int argc, char* argv[])
 
                         key = argv[optind++];
 
-                        if (jack_remove_property (uuid, key)) {
+                        if (jack_remove_property (client, uuid, key)) {
                                 fprintf (stderr, "\"%s\" property not removed for %s\n", key, subject);
                                 exit (1);
                         }
@@ -207,7 +202,7 @@ int main (int argc, char* argv[])
                                 return 1;
                         }
                         
-                        if (jack_remove_properties (uuid)) {
+                        if (jack_remove_properties (client, uuid)) {
                                 fprintf (stderr, "cannot remove properties for UUID %s\n", subject);
                                 exit (1);
                         }
@@ -230,22 +225,17 @@ int main (int argc, char* argv[])
                         type = "";
                 }
 
-                if (jack_set_property (uuid, key, value, type)) {
+                if (jack_set_property (client, uuid, key, value, type)) {
                         fprintf (stderr, "cannot set value for key %s of %s\n", value, subject);
                         exit (1);
                 }
                 
         } else {
 
-                /* list */
+                /* list properties */
                 
                 int args_left = argc - optind;
 
-                /* argc == 3: list all properties for a subject
-                   argc == 4: list value of key for subject
-                   argc == ?: list all
-                */
-                
                 if (args_left >= 2) {
 
                         /* list properties for a UUID/key pair */
