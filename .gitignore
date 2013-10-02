@@ -47,4 +47,4 @@ alsa_out
 alsa_in-alsa_in.o
 alsa_out-alsa_out.o
 alsa_in-memops.o
-alsa-out-memops.o
+alsa_out-memops.o
