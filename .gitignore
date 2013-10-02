@@ -10,6 +10,7 @@ freewheel.o
 iodelay.o
 ipload.o
 ipunload.o
+property.o
 jack_alias
 jack_bufsize
 jack_connect
