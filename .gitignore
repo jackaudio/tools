@@ -25,6 +25,7 @@ jack_monitor_client
 jack_netsource
 jack_netsource-netjack_packet.o
 jack_netsource-netsource.o
+jack_property
 jack_samplerate
 jack_session_notify
 jack_thread_wait
