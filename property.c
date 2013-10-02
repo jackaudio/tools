@@ -202,7 +202,7 @@ int main (int argc, char* argv[])
                                 return 1;
                         }
                         
-                        if (jack_remove_properties (client, uuid)) {
+                        if (jack_remove_properties (client, uuid) < 0) {
                                 fprintf (stderr, "cannot remove properties for UUID %s\n", subject);
                                 exit (1);
                         }
@@ -286,31 +286,42 @@ int main (int argc, char* argv[])
                                 }
                         }
 
+                        jack_free_description (&description, 0);
+
                 } else {
 
                         /* list all properties */
 
                         jack_description_t* description;
                         size_t cnt;
+                        size_t p;
+                        size_t n;
+                        char buf[JACK_UUID_STRING_SIZE];
 
                         if ((cnt = jack_get_all_properties (&description)) < 0) {
                                 fprintf (stderr, "could not retrieve properties for %s\n", subject);
                                 exit (1);
                         }
-#if 0
+
                         for (n = 0; n < cnt; ++n) {
-                                if (description.properties[n].type) {
-                                        printf ("key: %s value: %s type: %s\n", 
-                                                description.properties[n].key, 
-                                                description.properties[n].data,
-                                                description.properties[n].type);
-                                } else {
-                                        printf ("key: %s value: %s\n", 
-                                                description.properties[n].key, 
-                                                description.properties[n].data);
+                                jack_uuid_unparse (description[n].subject, buf);
+                                printf ("%s\n", buf);
+                                for (p = 0; p < description[n].property_cnt; ++p) {
+                                        if (description[n].properties[p].type) {
+                                                printf ("key: %s value: %s type: %s\n", 
+                                                        description[n].properties[n].key, 
+                                                        description[n].properties[n].data,
+                                                        description[n].properties[n].type);
+                                        } else {
+                                                printf ("key: %s value: %s\n", 
+                                                        description[n].properties[p].key, 
+                                                        description[n].properties[p].data);
+                                        }
                                 }
+                                jack_free_description (&description[n], 0);
                         }
-#endif
+
+                        free (description);
                 }
         }
 
