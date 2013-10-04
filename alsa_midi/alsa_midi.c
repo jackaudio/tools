@@ -205,7 +205,7 @@ a2j_input_event (struct a2j * self, snd_seq_event_t * alsa_event)
 		data[2] = 0x40;
 	}
 
-	a2j_debug("input: %d bytes at event_frame=%u", (int)size, now);
+	// a2j_debug("input: %d bytes at event_frame=%u", (int)size, now);
 
 	if (jack_ringbuffer_write_space(port->inbound_events) >= (sizeof(struct a2j_alsa_midi_event) + size)) {
 		struct a2j_alsa_midi_event ev;
@@ -297,7 +297,7 @@ a2j_process_incoming (struct a2j* self, struct a2j_port* port, jack_nframes_t nf
       offset = one_period - offset;
     }
     
-    a2j_debug ("event at %d offset %d", ev.time, offset);
+    // a2j_debug ("event at %d offset %d", ev.time, offset);
     
     /* make sure there is space for it */
     
@@ -312,7 +312,7 @@ a2j_process_incoming (struct a2j* self, struct a2j_port* port, jack_nframes_t nf
     }
     jack_ringbuffer_read_advance (port->inbound_events, sizeof(ev) + ev.size);
     
-    a2j_debug("input on %s: sucked %d bytes from inbound at %d", jack_port_name (port->jack_port), ev.size, ev.time);
+    // a2j_debug("input on %s: sucked %d bytes from inbound at %d", jack_port_name (port->jack_port), ev.size, ev.time);
   }
   
   return 0;
@@ -481,9 +481,9 @@ alsa_output_thread(void * arg)
 
     jack_ringbuffer_get_read_vector (self->outbound_events, vec);
 
-    a2j_debug ("output thread: got %d+%d events", 
-               (vec[0].len / sizeof (struct a2j_delivery_event)),
-               (vec[1].len / sizeof (struct a2j_delivery_event)));
+    // a2j_debug ("output thread: got %d+%d events", 
+    // (vec[0].len / sizeof (struct a2j_delivery_event)),
+    // (vec[1].len / sizeof (struct a2j_delivery_event)));
     
     ev = (struct a2j_delivery_event*) vec[0].buf;
     limit = vec[0].len / sizeof (struct a2j_delivery_event);
@@ -501,9 +501,9 @@ alsa_output_thread(void * arg)
 
     if (vec[0].len < sizeof(struct a2j_delivery_event) && (vec[1].len == 0)) {
       /* no events: wait for some */
-      a2j_debug ("output thread: wait for events");
+      // a2j_debug ("output thread: wait for events");
       sem_wait (&self->output_semaphore);
-      a2j_debug ("output thread: AWAKE ... loop back for events");
+      // a2j_debug ("output thread: AWAKE ... loop back for events");
       continue;
     }
 
@@ -534,7 +534,7 @@ alsa_output_thread(void * arg)
 
       ev->time += self->cycle_start;
 
-      a2j_debug ("@ %d, next event @ %d", now, ev->time);
+      // a2j_debug ("@ %d, next event @ %d", now, ev->time);
       
       /* do we need to wait a while before delivering? */
 
@@ -549,7 +549,7 @@ alsa_output_thread(void * arg)
           nanoseconds.tv_sec = (time_t) seconds;
           nanoseconds.tv_nsec = (long) NSEC_PER_SEC * (seconds - nanoseconds.tv_sec);
           
-          a2j_debug ("output thread sleeps for %.2f msec", ((double) nanoseconds.tv_nsec / NSEC_PER_SEC) * 1000.0);
+          // a2j_debug ("output thread sleeps for %.2f msec", ((double) nanoseconds.tv_nsec / NSEC_PER_SEC) * 1000.0);
 
           if (nanosleep (&nanoseconds, NULL) < 0) {
             fprintf (stderr, "BAD SLEEP\n");
@@ -562,8 +562,8 @@ alsa_output_thread(void * arg)
       err = snd_seq_event_output(self->seq, &alsa_event);
       snd_seq_drain_output (self->seq);
       now = jack_frame_time (self->jack_client);
-      a2j_debug("alsa_out: written %d bytes to %s at %d, DELTA = %d", ev->jack_event.size, ev->port->name, now, 
-                (int32_t) (now - ev->time));
+      // a2j_debug("alsa_out: written %d bytes to %s at %d, DELTA = %d", ev->jack_event.size, ev->port->name, now, 
+      // (int32_t) (now - ev->time));
     }
 
     /* free up space in the FIFO */
