@@ -195,13 +195,13 @@ a2j_port_create (struct a2j * self, int dir, snd_seq_addr_t addr, const snd_seq_
 	}
 
 	if (err) {
-		a2j_info("port skipped: %s", port->name);
+		a2j_debug("port skipped: %s", port->name);
 		goto fail_free_port;
 	}
 
 	port->inbound_events = jack_ringbuffer_create(MAX_EVENT_SIZE*16);
 
-	a2j_info("port created: %s", port->name);
+	a2j_debug("port created: %s", port->name);
 	return port;
 
   fail_free_port:

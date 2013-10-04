@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
  */
 
-#ifndef STRUCTS_H__FD2CC895_411F_4ADE_9200_50FE395EDB72__INCLUDED
-#define STRUCTS_H__FD2CC895_411F_4ADE_9200_50FE395EDB72__INCLUDED
+#ifndef __jack_alsa_midi_h__
+#define __jack_alsa_midi_h__
 
 #include <stdbool.h>
 #include <semaphore.h>
@@ -116,11 +116,17 @@ struct a2j_delivery_event
     char midistring[MAX_JACKMIDI_EV_SIZE];
 };
 
-void a2j_info (const char* fmt, ...);
 void a2j_error (const char* fmt, ...);
-void a2j_debug (const char* fmt, ...);
-void a2j_warning (const char* fmt, ...);
 
+#define A2J_DEBUG
+/*#undef A2J_DEBUG*/
 
+#ifdef A2J_DEBUG
+extern bool a2j_do_debug;
+extern void _a2j_debug (const char* fmt, ...);
+#define a2j_debug(fmt, ...) if (a2j_do_debug) { _a2j_debug ((fmt), ##__VA_ARGS__); }
+#else
+#define a2j_debug(fmt,...)
+#endif
 
-#endif /* #ifndef STRUCTS_H__FD2CC895_411F_4ADE_9200_50FE395EDB72__INCLUDED */
+#endif /* __jack_alsa_midi_h__ */

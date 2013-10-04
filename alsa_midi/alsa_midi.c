@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2006,2007 Dmitry S. Baikov <c0ff@konstruktiv.org>
  * Copyright (c) 2007,2008,2009 Nedko Arnaudov <nedko@arnaudov.name>
- * Copyright (c) 2009,2010 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (c) 2009,2010,2013 Paul Davis <paul@linuxaudiosystems.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,38 +35,21 @@
 #include "port.h"
 #include "port_thread.h"
 
-bool g_stop_request = false;
+#ifdef A2J_DEBUG
+bool a2j_do_debug = false;
 
 void
-a2j_info (const char* fmt, ...)
-{
-	va_list ap;
-	va_start (ap, fmt);
-	vfprintf (stdout, fmt, ap);
-	fputc ('\n', stdout);
-}
-
-void
-a2j_error (const char* fmt, ...)
-{
-	va_list ap;
-	va_start (ap, fmt);
-	vfprintf (stdout, fmt, ap);
-	fputc ('\n', stdout);
-}
-
-
-void
-a2j_debug (const char* fmt, ...)
+_a2j_debug (const char* fmt, ...)
 {
 	va_list ap;
 	va_start (ap, fmt);
 	vfprintf (stderr, fmt, ap);
 	fputc ('\n', stdout);
 }
+#endif
 
 void
-a2j_warning (const char* fmt, ...)
+a2j_error (const char* fmt, ...)
 {
 	va_list ap;
 	va_start (ap, fmt);
@@ -100,7 +83,7 @@ a2j_stream_detach (struct a2j_stream * stream_ptr)
 		node_ptr = stream_ptr->list.next;
 		list_del (node_ptr);
 		port_ptr = list_entry (node_ptr, struct a2j_port, siblings);
-		a2j_info ("port deleted: %s", port_ptr->name);
+		a2j_debug ("port deleted: %s", port_ptr->name);
 		a2j_port_free (port_ptr);
 	}
 }
@@ -205,7 +188,7 @@ a2j_input_event (struct a2j * self, snd_seq_event_t * alsa_event)
 		data[2] = 0x40;
 	}
 
-	// a2j_debug("input: %d bytes at event_frame=%u", (int)size, now);
+	a2j_debug("input: %d bytes at event_frame=%u", (int)size, now);
 
 	if (jack_ringbuffer_write_space(port->inbound_events) >= (sizeof(struct a2j_alsa_midi_event) + size)) {
 		struct a2j_alsa_midi_event ev;
@@ -267,7 +250,7 @@ a2j_process_incoming (struct a2j* self, struct a2j_port* port, jack_nframes_t nf
   /* first clear the JACK port buffer in preparation for new data 
    */
   
-  // a2j_debug ("PORT: %s process input", jack_port_name (port->jack_port));
+  a2j_debug ("PORT: %s process input", jack_port_name (port->jack_port));
   
   jack_midi_clear_buffer (port->jack_buf);
   
@@ -297,7 +280,7 @@ a2j_process_incoming (struct a2j* self, struct a2j_port* port, jack_nframes_t nf
       offset = one_period - offset;
     }
     
-    // a2j_debug ("event at %d offset %d", ev.time, offset);
+    a2j_debug ("event at %d offset %d", ev.time, offset);
     
     /* make sure there is space for it */
     
@@ -312,7 +295,7 @@ a2j_process_incoming (struct a2j* self, struct a2j_port* port, jack_nframes_t nf
     }
     jack_ringbuffer_read_advance (port->inbound_events, sizeof(ev) + ev.size);
     
-    // a2j_debug("input on %s: sucked %d bytes from inbound at %d", jack_port_name (port->jack_port), ev.size, ev.time);
+    a2j_debug("input on %s: sucked %d bytes from inbound at %d", jack_port_name (port->jack_port), ev.size, ev.time);
   }
   
   return 0;
@@ -439,7 +422,7 @@ a2j_process_outgoing (
     }
   }
 
-  // a2j_debug( "done pushing events: %d ... gap: %d ", (int)written, (int)gap );
+  a2j_debug( "done pushing events: %d ... gap: %d ", (int)written, (int)gap );
   /* clear JACK port buffer; advance ring buffer ptr */
 
   jack_ringbuffer_write_advance (self->outbound_events, written * sizeof (struct a2j_delivery_event) + gap);
@@ -481,9 +464,9 @@ alsa_output_thread(void * arg)
 
     jack_ringbuffer_get_read_vector (self->outbound_events, vec);
 
-    // a2j_debug ("output thread: got %d+%d events", 
-    // (vec[0].len / sizeof (struct a2j_delivery_event)),
-    // (vec[1].len / sizeof (struct a2j_delivery_event)));
+    a2j_debug ("output thread: got %d+%d events", 
+               (vec[0].len / sizeof (struct a2j_delivery_event)),
+               (vec[1].len / sizeof (struct a2j_delivery_event)));
     
     ev = (struct a2j_delivery_event*) vec[0].buf;
     limit = vec[0].len / sizeof (struct a2j_delivery_event);
@@ -501,9 +484,9 @@ alsa_output_thread(void * arg)
 
     if (vec[0].len < sizeof(struct a2j_delivery_event) && (vec[1].len == 0)) {
       /* no events: wait for some */
-      // a2j_debug ("output thread: wait for events");
+      a2j_debug ("output thread: wait for events");
       sem_wait (&self->output_semaphore);
-      // a2j_debug ("output thread: AWAKE ... loop back for events");
+      a2j_debug ("output thread: AWAKE ... loop back for events");
       continue;
     }
 
@@ -534,7 +517,7 @@ alsa_output_thread(void * arg)
 
       ev->time += self->cycle_start;
 
-      // a2j_debug ("@ %d, next event @ %d", now, ev->time);
+      a2j_debug ("@ %d, next event @ %d", now, ev->time);
       
       /* do we need to wait a while before delivering? */
 
@@ -549,7 +532,7 @@ alsa_output_thread(void * arg)
           nanoseconds.tv_sec = (time_t) seconds;
           nanoseconds.tv_nsec = (long) NSEC_PER_SEC * (seconds - nanoseconds.tv_sec);
           
-          // a2j_debug ("output thread sleeps for %.2f msec", ((double) nanoseconds.tv_nsec / NSEC_PER_SEC) * 1000.0);
+          a2j_debug ("output thread sleeps for %.2f msec", ((double) nanoseconds.tv_nsec / NSEC_PER_SEC) * 1000.0);
 
           if (nanosleep (&nanoseconds, NULL) < 0) {
             fprintf (stderr, "BAD SLEEP\n");
@@ -562,8 +545,8 @@ alsa_output_thread(void * arg)
       err = snd_seq_event_output(self->seq, &alsa_event);
       snd_seq_drain_output (self->seq);
       now = jack_frame_time (self->jack_client);
-      // a2j_debug("alsa_out: written %d bytes to %s at %d, DELTA = %d", ev->jack_event.size, ev->port->name, now, 
-      // (int32_t) (now - ev->time));
+      a2j_debug("alsa_out: written %d bytes to %s at %d, DELTA = %d", ev->jack_event.size, ev->port->name, now, 
+                (int32_t) (now - ev->time));
     }
 
     /* free up space in the FIFO */
@@ -667,7 +650,7 @@ void
 a2j_shutdown (void * arg)
 {
   struct a2j* self = (struct a2j*) self;
-  a2j_warning ("JACK server shutdown notification received.");
+  a2j_debug ("JACK server shutdown notification received.");
   stop_threads (self);
 }
 
@@ -826,11 +809,10 @@ jack_initialize (jack_client_t *client, const char* load_init)
 			if ((token = strtok_r (ptr, ", ", &savep)) == NULL) {
 				break;
 			}
-#if 0                        
-                        /* example of how to use tokens */
 
-			if (strncasecmp (token, "in", 2) == 0) {
-				self->input = 1;
+#ifdef A2J_DEBUG
+			if (strncasecmp (token, "debug", 2) == 0) {
+                          a2j_do_debug = true;
 			}
 #endif
 
