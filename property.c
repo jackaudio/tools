@@ -82,7 +82,7 @@ get_subject (jack_client_t* client, char* argv[], int* optind)
 int main (int argc, char* argv[])
 {
         jack_client_t* client = NULL;
-	jack_options_t options = JackNullOption;
+	jack_options_t options = JackNoStartServer;
         char* key = NULL;
         char* value = NULL;
         char* type = NULL;
