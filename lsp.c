@@ -27,7 +27,7 @@ printf_name2uuid (jack_client_t* client, const char* pname)
 	snprintf(client_component, csize, "%s", pname);
 
 	char *uuid = jack_get_uuid_for_client_name(client, client_component);
-	if (uuid && strcmp(uuid, "-1") != 0) {
+	if (uuid) {
 		printf("%s%s\n", uuid, port_component );
 	} else {
 		printf("%s\n",pname);
