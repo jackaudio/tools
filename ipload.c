@@ -125,30 +125,24 @@ main (int argc, char *argv[])
 		}
 		exit (1);
 	}
-	if (status & JackServerStarted) {
-		fprintf (stderr, "JACK server started\n");
-	}
-	if (status & JackNameNotUnique) {
-		client_name = jack_get_client_name(client);
-		fprintf (stderr, "unique name `%s' assigned\n", client_name);
-	}
 
 	/* then, load the internal client */
 	jack_internal_client_load (client, intclient_name,
                                    (JackLoadName|JackLoadInit),
                                    &status, intclient, load_name, load_init);
 
+        if (status & JackNameNotUnique) {
+                fprintf (stderr, "unique internal client name `%s' assigned\n",
+                         load_name);
+                return 3;
+        }
+
         if (status & JackFailure) {
-                fprintf (stderr, "could not load %s, status = 0x%2.0x\n",
-                         load_name, status);
+                fprintf (stderr, "could not load %s, status = 0x%x\n",
+                         client_name, status);
                 return 2;
         }
         
-        if (status & JackNameNotUnique) {
-                intclient_name = jack_get_internal_client_name (client, intclient);
-                fprintf (stderr, "unique internal client name `%s' assigned\n",
-                         intclient_name);
-        }
         
 	fprintf (stdout, "%s is running.\n", load_name);
 
