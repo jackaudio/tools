@@ -42,7 +42,7 @@ get_subject (jack_client_t* client, char* argv[], int* optind)
 
                 if ((ustr = jack_get_uuid_for_client_name (client, cstr)) == NULL) {
                         fprintf (stderr, "cannot get UUID for client named %s\n", cstr);
-                        
+                        return -1;
                 }
                 
                 if (jack_uuid_parse (ustr, uuid)) {
