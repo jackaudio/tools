@@ -1,5 +1,11 @@
 MAINTAINERCLEANFILES    = Makefile.in
 
+if HAVE_ALSA_MIDI
+ALSA_MIDI_DIR = alsa_midi
+else
+ALSA_MIDI_DIR =
+endif
+
 if HAVE_READLINE
 JACK_TRANSPORT = jack_transport
 dist-check-readline:
@@ -43,6 +49,7 @@ bin_PROGRAMS = jack_load \
 	       jack_midi_dump \
 	       jack_iodelay \
 	       jack_load_test \
+	       jack_property \
 	       $(JACK_TRANSPORT) \
 	       $(NETJACK_TOOLS)
 
@@ -55,6 +62,10 @@ endif
 
 AM_CFLAGS = -I.. $(JACK_CFLAGS) $(sndfile_cflags)
 AM_CXXFLAGS = -I.. $(JACK_CFLAGS) $(sndfile_cflags)
+
+jack_property_SOURCES = property.c
+jack_property_LDFLAGS = @OS_LDFLAGS@
+jack_property_LDADD = $(top_builddir)/libjack/libjack.la
 
 jack_connect_SOURCES = connect.c
 jack_connect_LDFLAGS = @OS_LDFLAGS@
@@ -154,5 +165,8 @@ alsa_out_LDFLAGS = -lasound -lsamplerate @OS_LDFLAGS@
 alsa_out_LDADD = $(top_builddir)/libjack/libjack.la
 endif #HAVE_ALSA
 endif #HAVE_SAMPLERATE
+
+SUBDIRS = $(ALSA_MIDI_DIR)
+DIST_SUBDIRS = alsa_midi
 
 # XXX ? dist-hook: dist-check-sndfile dist-check-samplerate

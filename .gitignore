@@ -1,3 +1,5 @@
+*.lo
+*.la
 .deps/
 .libs/
 Makefile
@@ -10,6 +12,7 @@ freewheel.o
 iodelay.o
 ipload.o
 ipunload.o
+property.o
 jack_alias
 jack_bufsize
 jack_connect
@@ -25,6 +28,7 @@ jack_monitor_client
 jack_netsource
 jack_netsource-netjack_packet.o
 jack_netsource-netsource.o
+jack_property
 jack_samplerate
 jack_session_notify
 jack_thread_wait
@@ -45,4 +49,4 @@ alsa_out
 alsa_in-alsa_in.o
 alsa_out-alsa_out.o
 alsa_in-memops.o
-alsa-out-memops.o
+alsa_out-memops.o
