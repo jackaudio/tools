@@ -60,7 +60,9 @@ main (int argc, char *argv[])
 	/* now, unload the internal client */
 	status = jack_internal_client_unload (client, intclient);
 	if (status & JackFailure) {
-		if (status & JackNoSuchClient) {
+                if (status & JackInvalidOption) {
+                        fprintf (stderr, "I'm sorry Dave, I can't do that\n");
+                } else if (status & JackNoSuchClient) {
 			fprintf (stderr, "client %s is gone.\n",
 				 client_name);
 		} else {
