@@ -19,10 +19,11 @@ dist-check-readline:
 endif
 
 NETJACK_TOOLS = jack_netsource
+EXTRA_TOOLS =
 
 if HAVE_SAMPLERATE
 if HAVE_ALSA
-NETJACK_TOOLS += alsa_in alsa_out
+EXTRA_TOOLS += alsa_in alsa_out
 endif
 dist-check-samplerate:
 else
@@ -32,6 +33,10 @@ dist-check-samplerate:
 	@echo
 	@false
 endif
+
+if HAVE_ZITA_BRIDGE_DEPS
+	EXTRA_TOOLS += zalsa_in zalsa_out
+endif	
 
 bin_PROGRAMS = jack_load \
 	       jack_unload \
@@ -50,6 +55,7 @@ bin_PROGRAMS = jack_load \
 	       jack_iodelay \
 	       jack_load_test \
 	       jack_property \
+	       $(EXTRA_TOOLS) \
 	       $(JACK_TRANSPORT) \
 	       $(NETJACK_TOOLS)
 
@@ -167,6 +173,11 @@ endif #HAVE_ALSA
 endif #HAVE_SAMPLERATE
 
 SUBDIRS = $(ALSA_MIDI_DIR)
-DIST_SUBDIRS = alsa_midi
+
+#if HAVE_ZITA_BRIDGE_DEPS
+SUBDIRS += zalsa
+#endif
+
+DIST_SUBDIRS = alsa_midi zalsa
 
 # XXX ? dist-hook: dist-check-sndfile dist-check-samplerate
