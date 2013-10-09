@@ -35,7 +35,7 @@ void
 show_usage ()
 {
 	fprintf (stderr, "usage: %s [ options ] client-name [ load-name "
-		 "[ init-string]]\n\noptions:\n", client_name);
+		 "\n\noptions:\n", client_name);
 	fprintf (stderr,
 		 "\t-h, --help \t\t print help message\n"
 		 "\t-i, --init string\t initialize string\n"
