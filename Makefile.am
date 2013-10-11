@@ -1,11 +1,5 @@
 MAINTAINERCLEANFILES    = Makefile.in
 
-if HAVE_ALSA_MIDI
-ALSA_MIDI_DIR = alsa_midi
-else
-ALSA_MIDI_DIR =
-endif
-
 if HAVE_READLINE
 JACK_TRANSPORT = jack_transport
 dist-check-readline:
@@ -172,12 +166,10 @@ alsa_out_LDADD = $(top_builddir)/libjack/libjack.la
 endif #HAVE_ALSA
 endif #HAVE_SAMPLERATE
 
-SUBDIRS = $(ALSA_MIDI_DIR)
-
 #if HAVE_ZITA_BRIDGE_DEPS
-SUBDIRS += zalsa
+SUBDIRS = zalsa
 #endif
 
-DIST_SUBDIRS = alsa_midi zalsa
+DIST_SUBDIRS = zalsa
 
 # XXX ? dist-hook: dist-check-sndfile dist-check-samplerate
