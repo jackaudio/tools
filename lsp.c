@@ -8,6 +8,7 @@
 
 #include <jack/jack.h>
 #include <jack/session.h>
+#include <jack/uuid.h>
 
 char * my_name;
 
@@ -47,7 +48,6 @@ show_usage (void)
 	fprintf (stderr, "        -A, --aliases         List aliases for each port\n");
 	fprintf (stderr, "        -c, --connections     List connections to/from each port\n");
 	fprintf (stderr, "        -l, --latency         Display per-port latency in frames at each port\n");
-	fprintf (stderr, "        -L, --latency         Display total latency in frames at each port\n");
 	fprintf (stderr, "        -p, --properties      Display port properties. Output may include:\n"
 			 "                              input|output, can-monitor, physical, terminal\n\n");
 	fprintf (stderr, "        -t, --type            Display port type\n");
@@ -70,7 +70,6 @@ main (int argc, char *argv[])
 	int show_aliases = 0;
 	int show_con = 0;
 	int show_port_latency = 0;
-	int show_total_latency = 0;
 	int show_properties = 0;
 	int show_type = 0;
 	int show_uuid = 0;
@@ -86,7 +85,6 @@ main (int argc, char *argv[])
 		{ "aliases", 0, 0, 'A' },
 		{ "connections", 0, 0, 'c' },
 		{ "port-latency", 0, 0, 'l' },
-		{ "total-latency", 0, 0, 'L' },
 		{ "properties", 0, 0, 'p' },
 		{ "type", 0, 0, 't' },
 		{ "uuid", 0, 0, 'u' },
@@ -120,9 +118,6 @@ main (int argc, char *argv[])
 			break;
 		case 'l':
 			show_port_latency = 1;
-			break;
-		case 'L':
-			show_total_latency = 1;
 			break;
 		case 'p':
 			show_properties = 1;
@@ -187,9 +182,8 @@ main (int argc, char *argv[])
 	
                 if (show_port_uuid) {
                         char buf[64];
-                        jack_uuid_t uuid;
-                        jack_port_uuid (port, uuid);
-                        uuid_unparse (uuid, buf);
+                        jack_uuid_t uuid = jack_port_uuid (port);
+                        jack_uuid_unparse (uuid, buf);
                         printf ("	uuid: %s\n", buf);
                 }
 
@@ -220,8 +214,6 @@ main (int argc, char *argv[])
 		if (show_port_latency) {
 			if (port) {
 				jack_latency_range_t range;
-				printf ("	port latency = %" PRIu32 " frames\n",
-					jack_port_get_latency (port));
 
 				jack_port_get_latency_range (port, JackPlaybackLatency, &range);
 				printf ("	port playback latency = [ %" PRIu32 " %" PRIu32 " ] frames\n",
@@ -232,12 +224,7 @@ main (int argc, char *argv[])
 					range.min, range.max);
 			}
 		}
-		if (show_total_latency) {
-			if (port) {
-				printf ("	total latency = %" PRIu32 " frames\n",
-					jack_port_get_total_latency (client, port));
-			}
-		}
+
 		if (show_properties) {
 			if (port) {
 				int flags = jack_port_flags (port);
