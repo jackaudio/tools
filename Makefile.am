@@ -28,10 +28,6 @@ dist-check-samplerate:
 	@false
 endif
 
-if HAVE_ZITA_BRIDGE_DEPS
-	EXTRA_TOOLS += zalsa_in zalsa_out
-endif	
-
 bin_PROGRAMS = jack_load \
 	       jack_unload \
 	       jack_monitor_client \
@@ -166,9 +162,9 @@ alsa_out_LDADD = $(top_builddir)/libjack/libjack.la
 endif #HAVE_ALSA
 endif #HAVE_SAMPLERATE
 
-#if HAVE_ZITA_BRIDGE_DEPS
+if HAVE_ZITA_BRIDGE_DEPS
 SUBDIRS = zalsa
-#endif
+endif
 
 DIST_SUBDIRS = zalsa
 
