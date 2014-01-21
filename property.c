@@ -25,12 +25,12 @@ show_usage (void)
 	fprintf (stderr, "        -d, --delete UUID	Remove/delete all properties for \"UUID\"\n");
 	fprintf (stderr, "        -D, --delete-all	Remove/delete all properties\n");
         fprintf (stderr, "        --client		Interpret UUID as a client name, not a UUID\n");
-        fprintf (stderr, "        --port		Interpret UUID as a port name, not a UUID\n");
-	fprintf (stderr, "Display options:\n");
+        fprintf (stderr, "        --port		\tInterpret UUID as a port name, not a UUID\n");
+	fprintf (stderr, "\nDisplay options:\n");
 	fprintf (stderr, "        -l			Show all properties\n");
-	fprintf (stderr, "        -l, --list UUID	Show value all properties of UUID\n");
+	fprintf (stderr, "        -l, --list UUID	\tShow value all properties of UUID\n");
 	fprintf (stderr, "        -l, --list UUID key	Show value for key of UUID\n");
-	fprintf (stderr, "For more information see http://jackaudio.org/\n");
+	fprintf (stderr, "\nFor more information see http://jackaudio.org/\n");
 }
 
 static int
