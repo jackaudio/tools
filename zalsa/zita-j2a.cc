@@ -39,8 +39,8 @@ static bool          v_opt = false;
 static bool          L_opt = false;
 static const char   *jname = APPNAME;
 static const char   *device = 0;
-static int           fsamp = 48000;
-static int           bsize = 256;
+static int           fsamp = 0;
+static int           bsize = 0;
 static int           nfrag = 2;
 static int           nchan = 2;
 static int           rqual = 48;
@@ -213,10 +213,27 @@ int jack_initialize (jack_client_t* client, const char* load_init)
     if (device == 0) help ();
     if (rqual < 16) rqual = 16;
     if (rqual > 96) rqual = 96;
-    if ((fsamp < 8000) || (bsize < 16) || (nfrag < 2) || (nchan < 1))
+    if ((fsamp && fsamp < 8000) || (bsize && bsize < 16) || (nfrag < 2) || (nchan < 1))
     {
 	fprintf (stderr, "Illegal parameter value(s).\n");
 	return 1;
+    }
+
+    J = new Jackclient (client, 0, Jackclient::PLAY, 0);
+    usleep (100000);
+
+    /* if SR and/or bufsize are unspecified, use the same values
+       as the JACK server.
+    */
+    
+    if (fsamp == 0) 
+    {
+       fsamp = J->fsamp();
+    }
+
+    if (bsize == 0) 
+    {
+       bsize = J->bsize();
     }
 
     opts = 0;
@@ -235,8 +252,7 @@ int jack_initialize (jack_client_t* client, const char* load_init)
 	fprintf (stderr, "Warning: only %d channels are available.\n", nchan);
     }
     P = new Alsathread (A, Alsathread::PLAY);
-    J = new Jackclient (client, 0, Jackclient::PLAY, nchan);
-    usleep (100000);
+    J->register_ports (nchan);
 
     t_alsa = (double) bsize / fsamp;
     if (t_alsa < 1e-3) t_alsa = 1e-3;

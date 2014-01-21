@@ -50,6 +50,7 @@ public:
     int fsamp (void) const { return _fsamp; }
     int bsize (void) const { return _bsize; }
     int rprio (void) const { return _rprio; }
+    void register_ports (int nports);
 
 private:
 
@@ -78,7 +79,7 @@ private:
     int  jack_process (int nframes);
 
     jack_client_t  *_client;
-    jack_port_t    *_ports [64];
+    jack_port_t    *_ports [256];
     const char     *_jname;
     int             _mode;
     int             _nchan;
