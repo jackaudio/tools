@@ -104,6 +104,11 @@ int main (int argc, char* argv[])
 		{ 0, 0, 0, 0 }
 	};
 
+        if (argc < 2) {
+                show_usage ();
+                exit (1);
+        }
+
 	while ((c = getopt_long (argc, argv, "sdDlaApc", long_options, &option_index)) >= 0) {
 		switch (c) {
 		case 's':
