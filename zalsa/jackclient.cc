@@ -70,7 +70,7 @@ void Jackclient::init (const char *jserv)
        register_ports (_nchan);
     }
 
-    _rprio = jack_client_real_time_priority (_client) -  sched_get_priority_max (spol);
+    _rprio = jack_client_real_time_priority (_client);
 }
 
 void Jackclient::register_ports (int n)
