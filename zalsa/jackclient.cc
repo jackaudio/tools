@@ -25,8 +25,9 @@
 #include "alsathread.h"
 
 
-Jackclient::Jackclient (jack_client_t* cl, const char*jserv, int mode, int nchan) :
+Jackclient::Jackclient (jack_client_t* cl, const char*jserv, int mode, int nchan, void *arg) :
     _client (cl),
+    _arg (arg),
     _mode (mode),
     _nchan (nchan),     
     _state (INIT),

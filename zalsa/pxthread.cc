@@ -47,7 +47,6 @@ int Pxthread::thr_start (int policy, int priority, size_t stacksize)
 
     min = sched_get_priority_min (policy);
     max = sched_get_priority_max (policy);
-    priority += max;
     if (priority > max) priority = max;
     if (priority < min) priority = min;
     parm.sched_priority = priority;
