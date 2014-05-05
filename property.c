@@ -314,9 +314,9 @@ int main (int argc, char* argv[])
                                 for (p = 0; p < description[n].property_cnt; ++p) {
                                         if (description[n].properties[p].type) {
                                                 printf ("key: %s value: %s type: %s\n", 
-                                                        description[n].properties[n].key, 
-                                                        description[n].properties[n].data,
-                                                        description[n].properties[n].type);
+                                                        description[n].properties[p].key, 
+                                                        description[n].properties[p].data,
+                                                        description[n].properties[p].type);
                                         } else {
                                                 printf ("key: %s value: %s\n", 
                                                         description[n].properties[p].key, 
