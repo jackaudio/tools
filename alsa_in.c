@@ -247,7 +247,7 @@ static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams, int pe
 	}
 	err = snd_pcm_sw_params_set_stop_threshold(handle, swparams, -1 );
 	if (err < 0) {
-		printf("Unable to set start threshold mode for capture: %s\n", snd_strerror(err));
+		printf("Unable to set stop threshold mode for capture: %s\n", snd_strerror(err));
 		return err;
 	}
 	/* allow the transfer when at least period_size samples can be processed */
