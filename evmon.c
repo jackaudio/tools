@@ -27,10 +27,17 @@
 #include <jack/uuid.h>
 
 void
+port_rename_callback (jack_port_id_t port, const char* old_name, const char* new_name)
+{
+	printf ("Port %d renamed from %s to %s\n", port, old_name, new_name);
+}
+
+void
 port_callback (jack_port_id_t port, int yn, void* arg)
 {
 	printf ("Port %d %s\n", port, (yn ? "registered" : "unregistered"));
 }
+
 
 void
 connect_callback (jack_port_id_t a, jack_port_id_t b, int yn, void* arg)
@@ -101,6 +108,10 @@ main (int argc, char *argv[])
 	}
 	
 	if (jack_set_port_registration_callback (client, port_callback, NULL)) {
+		fprintf (stderr, "cannot set port registration callback\n");
+		return 1;
+	}
+	if (jack_set_port_rename_callback (client, port_rename_callback, NULL)) {
 		fprintf (stderr, "cannot set port registration callback\n");
 		return 1;
 	}
