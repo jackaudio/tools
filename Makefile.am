@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 MAINTAINERCLEANFILES    = Makefile.in
 
 if HAVE_READLINE
@@ -143,22 +145,25 @@ jack_unload_LDADD = $(top_builddir)/libjack/libjack.la
 #
 # Netjack slave tools
 #
-jack_netsource_SOURCES = netsource.c $(top_builddir)/drivers/netjack/netjack_packet.c
+jack_netsource_SOURCES = netsource.c
 jack_netsource_CFLAGS = @NETJACK_CFLAGS@ -I$(top_srcdir)/drivers/netjack
-jack_netsource_LDFLAGS = @NETJACK_LIBS@ @OS_LDFLAGS@ 
-jack_netsource_LDADD = $(top_builddir)/libjack/libjack.la
+jack_netsource_LDFLAGS = @NETJACK_LIBS@ @OS_LDFLAGS@
+jack_netsource_LDADD = $(top_builddir)/libjack/libjack.la \
+						$(top_builddir)/drivers/netjack/libnetjack_packet.la
 
 if HAVE_SAMPLERATE
 if HAVE_ALSA
-alsa_in_SOURCES = alsa_in.c $(top_builddir)/drivers/alsa/memops.c
+alsa_in_SOURCES = alsa_in.c
 alsa_in_CFLAGS = @NETJACK_CFLAGS@ -I$(top_builddir)/drivers/alsa
 alsa_in_LDFLAGS = -lasound -lsamplerate @OS_LDFLAGS@
-alsa_in_LDADD = $(top_builddir)/libjack/libjack.la
+alsa_in_LDADD = $(top_builddir)/libjack/libjack.la  \
+				$(top_builddir)/drivers/alsa/libmemops.la
 
-alsa_out_SOURCES = alsa_out.c $(top_builddir)/drivers/alsa/memops.c
+alsa_out_SOURCES = alsa_out.c
 alsa_out_CFLAGS = @NETJACK_CFLAGS@ -I$(top_builddir)/drivers/alsa
 alsa_out_LDFLAGS = -lasound -lsamplerate @OS_LDFLAGS@
-alsa_out_LDADD = $(top_builddir)/libjack/libjack.la
+alsa_out_LDADD = $(top_builddir)/libjack/libjack.la \
+				$(top_builddir)/drivers/alsa/libmemops.la
 endif #HAVE_ALSA
 endif #HAVE_SAMPLERATE
 
