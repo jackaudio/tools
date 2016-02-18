@@ -27,7 +27,7 @@
 #include <jack/uuid.h>
 
 void
-port_rename_callback (jack_port_id_t port, const char* old_name, const char* new_name)
+port_rename_callback (jack_port_id_t port, const char* old_name, const char* new_name, void * ptr)
 {
 	printf ("Port %d renamed from %s to %s\n", port, old_name, new_name);
 }
