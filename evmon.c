@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 Paul Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -82,7 +82,7 @@ propchange (jack_uuid_t subject, const char* key, jack_property_change_t change)
                 printf ("All properties changed!\n");
         } else {
                 jack_uuid_unparse (subject, buf);
-                
+
                 if (key) {
                         printf ("key [%s] for %s %s\n", key, buf, action);
                 } else {
@@ -106,7 +106,7 @@ main (int argc, char *argv[])
 		}
 		return 1;
 	}
-	
+
 	if (jack_set_port_registration_callback (client, port_callback, NULL)) {
 		fprintf (stderr, "cannot set port registration callback\n");
 		return 1;
