@@ -79,12 +79,10 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 
 		pos->bar = abs_beat / pos->beats_per_bar;
 		pos->beat = abs_beat - (pos->bar * pos->beats_per_bar) + 1;
-		pos->tick = abs_tick - (abs_beat * pos->ticks_per_beat);
+		last_tick = abs_tick - (abs_beat * pos->ticks_per_beat);
 		pos->bar_start_tick = pos->bar * pos->beats_per_bar *
 			pos->ticks_per_beat;
 		pos->bar++;		/* adjust start to bar 1 */
-
-		last_tick = pos->tick;
 
 #if 0
 		/* some debug code... */
@@ -110,9 +108,9 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 					* pos->ticks_per_beat;
 			}
 		}
-
-		pos->tick = (int)(last_tick + 0.5);
 	}
+
+	pos->tick = (int)(last_tick + 0.5);
 
 	if (avr_set) {
 		pos->valid |= JackAudioVideoRatio;
