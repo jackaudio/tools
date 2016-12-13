@@ -32,6 +32,7 @@
 char *package;				/* program name */
 int done = 0;
 jack_client_t *client;
+double last_tick;
 
 /* Time and tempo variables.  These are global to the entire,
  * transport timeline.  There is no attempt to keep a true tempo map.
@@ -83,6 +84,8 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 			pos->ticks_per_beat;
 		pos->bar++;		/* adjust start to bar 1 */
 
+		last_tick = pos->tick;
+
 #if 0
 		/* some debug code... */
 		fprintf(stderr, "\nnew position: %" PRIu32 "\tBBT: %3"
@@ -93,12 +96,12 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 	} else {
 
 		/* Compute BBT info based on previous period. */
-		pos->tick +=
+		last_tick +=
 			nframes * pos->ticks_per_beat * pos->beats_per_minute
 			/ (pos->frame_rate * 60);
 
-		while (pos->tick >= pos->ticks_per_beat) {
-			pos->tick -= pos->ticks_per_beat;
+		while (last_tick >= pos->ticks_per_beat) {
+			last_tick -= pos->ticks_per_beat;
 			if (++pos->beat > pos->beats_per_bar) {
 				pos->beat = 1;
 				++pos->bar;
@@ -107,6 +110,8 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 					* pos->ticks_per_beat;
 			}
 		}
+
+		pos->tick = (int)(last_tick + 0.5);
 	}
 
 	if (avr_set) {
