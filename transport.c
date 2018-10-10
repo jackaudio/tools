@@ -118,6 +118,11 @@ void timebase(jack_transport_state_t state, jack_nframes_t nframes,
 	}
 }
 
+int jack_process(jack_nframes_t nframes, void *arg)
+{
+	return 0;
+}
+
 void jack_shutdown(void *arg)
 {
 #if defined(RL_READLINE_VERSION) && RL_READLINE_VERSION >= 0x0400
@@ -492,6 +497,7 @@ int main(int argc, char *argv[])
 	signal(SIGHUP, signal_handler);
 	signal(SIGINT, signal_handler);
 
+	jack_set_process_callback(client, jack_process, 0);
 	jack_on_shutdown(client, jack_shutdown, 0);
 
 	if (jack_activate(client)) {
