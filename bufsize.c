@@ -2,7 +2,7 @@
  *  bufsize.c -- change JACK buffer size.
  *
  *  Copyright (C) 2003 Jack O'Quin.
- *  
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +47,6 @@ void signal_handler(int sig)
 
 void parse_arguments(int argc, char *argv[])
 {
-
 	/* basename $0 */
 	package = strrchr(argv[0], '/');
 	if (package == 0)
@@ -64,10 +63,10 @@ void parse_arguments(int argc, char *argv[])
 		exit(9);
 	}
 
-        if (strspn (argv[1], "0123456789") != strlen (argv[1])) {
+	if (strspn (argv[1], "0123456789") != strlen (argv[1])) {
 		fprintf(stderr, "usage: %s <bufsize>\n", package);
 		exit(8);
-        }
+	}
 
 	nframes = strtoul(argv[1], NULL, 0);
 	if (errno == ERANGE) {
@@ -75,12 +74,11 @@ void parse_arguments(int argc, char *argv[])
 			package, argv[1]);
 		exit(2);
 	}
-        if (nframes < 1 || nframes > 16384) {
+	if (nframes < 1 || nframes > 16384) {
 		fprintf(stderr, "%s: invalid buffer size: %s (range is 1-16384)\n",
 			package, argv[1]);
 		exit(3);
-        }
-                
+	}
 }
 
 void silent_function( const char *ignore )
@@ -90,28 +88,29 @@ void silent_function( const char *ignore )
 int main(int argc, char *argv[])
 {
 	int rc;
-
 	parse_arguments(argc, argv);
 
-        if (just_print_bufsize)
-                jack_set_info_function( silent_function );
+	if (just_print_bufsize)
+		jack_set_info_function( silent_function );
 
 	/* become a JACK client */
-	if ((client = jack_client_open(package, JackNullOption, NULL)) == 0) {
+	if ((client = jack_client_open(package, JackNoStartServer, NULL)) == 0) {
 		fprintf(stderr, "JACK server not running?\n");
 		exit(1);
 	}
 
+#ifndef WIN32
 	signal(SIGQUIT, signal_handler);
-	signal(SIGTERM, signal_handler);
 	signal(SIGHUP, signal_handler);
+#endif
+	signal(SIGTERM, signal_handler);
 	signal(SIGINT, signal_handler);
 
 	jack_on_shutdown(client, jack_shutdown, 0);
 
 	if (just_print_bufsize) {
 		fprintf(stdout, "%d\n", jack_get_buffer_size( client ) );
-		rc=0;
+		rc = 0;
 	}
 	else
 	{
