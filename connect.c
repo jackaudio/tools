@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2002 Jeremy Hall
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -14,12 +14,13 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include <stdio.h>
 #include <errno.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -31,6 +32,13 @@
 
 #define TRUE 1
 #define FALSE 0
+
+volatile int done = 0;
+
+void port_connect_callback(jack_port_id_t a, jack_port_id_t b, int connect, void* arg)
+{
+	done = 1;
+}
 
 void
 show_version (char *my_name)
@@ -49,7 +57,6 @@ show_usage (char *my_name)
 	fprintf (stderr, "        -h, --help            Display this help message\n\n");
 	fprintf (stderr, "For more information see http://jackaudio.org/\n");
 }
-
 
 int
 main (int argc, char *argv[])
@@ -73,11 +80,11 @@ main (int argc, char *argv[])
 	int rc = 1;
 
 	struct option long_options[] = {
-	    { "server", 1, 0, 's' },
-	    { "help", 0, 0, 'h' },
-	    { "version", 0, 0, 'v' },
-	    { "uuid", 0, 0, 'u' },
-	    { 0, 0, 0, 0 }
+		{ "server", 1, 0, 's' },
+		{ "help", 0, 0, 'h' },
+		{ "version", 0, 0, 'v' },
+		{ "uuid", 0, 0, 'u' },
+		{ 0, 0, 0, 0 }
 	};
 
 	while ((c = getopt_long (argc, argv, "s:hvu", long_options, &option_index)) >= 0) {
@@ -120,7 +127,7 @@ main (int argc, char *argv[])
 		fprintf(stderr, "ERROR! client should be called jack_connect or jack_disconnect. client is called %s\n", my_name);
 		return 1;
 	}
-	
+
 	if (argc < 3) {
 		show_usage(my_name);
 		return 1;
@@ -132,6 +139,8 @@ main (int argc, char *argv[])
 		fprintf (stderr, "jack server not running?\n");
 		return 1;
 	}
+
+	jack_set_port_connect_callback(client, port_connect_callback, NULL);
 
 	/* find the two ports */
 
@@ -174,11 +183,11 @@ main (int argc, char *argv[])
 	if ((port1 = jack_port_by_name(client, portA)) == 0) {
 		fprintf (stderr, "ERROR %s not a valid port\n", portA);
 		goto exit;
-		}
+	}
 	if ((port2 = jack_port_by_name(client, portB)) == 0) {
 		fprintf (stderr, "ERROR %s not a valid port\n", portB);
 		goto exit;
-		}
+	}
 
 	port1_flags = jack_port_flags (port1);
 	port2_flags = jack_port_flags (port2);
@@ -200,19 +209,36 @@ main (int argc, char *argv[])
 		goto exit;
 	}
 
+	/* tell the JACK server that we are ready to roll */
+	if (jack_activate (client)) {
+		fprintf (stderr, "cannot activate client");
+		goto exit;
+	}
+
 	/* connect the ports. Note: you can't do this before
 	   the client is activated (this may change in the future).
 	*/
 
 	if (connecting) {
 		if (jack_connect(client, jack_port_name(src_port), jack_port_name(dst_port))) {
+			fprintf (stderr, "cannot connect client, already connected?\n");
 			goto exit;
 		}
 	}
 	if (disconnecting) {
 		if (jack_disconnect(client, jack_port_name(src_port), jack_port_name(dst_port))) {
+			fprintf (stderr, "cannot disconnect client, already disconnected?\n");
 			goto exit;
 		}
+	}
+
+	// Wait for connection/disconnection to be effective
+	while(!done) {
+#ifdef WIN32
+		Sleep(10);
+#else
+		usleep(10000);
+#endif
 	}
 
 	/* everything was ok, so setting exitcode to 0 */
@@ -222,4 +248,3 @@ exit:
 	jack_client_close (client);
 	exit (rc);
 }
-
