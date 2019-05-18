@@ -256,12 +256,6 @@ static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams, int pe
 		printf("Unable to set avail min for capture: %s\n", snd_strerror(err));
 		return err;
 	}
-	/* align all transfers to 1 sample */
-	err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
-	if (err < 0) {
-		printf("Unable to set transfer align for capture: %s\n", snd_strerror(err));
-		return err;
-	}
 	/* write the parameters to the playback device */
 	err = snd_pcm_sw_params(handle, swparams);
 	if (err < 0) {
@@ -312,7 +306,7 @@ void freewheel (int freewheel_starting, void *ignored_arg)
         if( freewheel_starting ) {
                 snd_pcm_close( alsa_handle );
                 alsa_handle = 0;
-                // reset resampling parameters 
+                // reset resampling parameters
                 resample_mean = 1.0;
                 static_resample_factor = 1.0;
                 resample_lower_limit = 0.25;
@@ -342,7 +336,7 @@ int process (jack_nframes_t nframes, void *arg) {
             /* freewheeling, or some other error */
             return 0;
     }
-    
+
     delay = snd_pcm_avail( alsa_handle );
 
     delay -= jack_frames_since_cycle_start( client );
@@ -363,7 +357,7 @@ int process (jack_nframes_t nframes, void *arg) {
 
 	// Set the resample_rate... we need to adjust the offset integral, to do this.
 	// first look at the PI controller, this code is just a special case, which should never execute once
-	// everything is swung in. 
+	// everything is swung in.
 	offset_integral = - (resample_mean - static_resample_factor) * catch_factor * catch_factor2;
 	// Also clear the array. we are beginning a new control cycle.
 	for( i=0; i<smooth_size; i++ )
@@ -408,7 +402,7 @@ int process (jack_nframes_t nframes, void *arg) {
     if( fabs( smooth_offset ) < pclamp )
 	    smooth_offset = 0.0;
 
-    // ok. now this is the PI controller. 
+    // ok. now this is the PI controller.
     // u(t) = K * ( e(t) + 1/T \int e(t') dt' )
     // K = 1/catch_factor and T = catch_factor2
     double current_resample_factor = static_resample_factor - smooth_offset / (double) catch_factor - offset_integral / (double) catch_factor / (double)catch_factor2;
@@ -488,7 +482,7 @@ again:
     //printf( "putback = %d\n", put_back_samples );
     snd_pcm_rewind( alsa_handle, put_back_samples );
 
-    return 0;      
+    return 0;
 }
 
 /**
@@ -720,7 +714,7 @@ int main (int argc, char *argv[]) {
 	    jack_set_latency_callback (client, latency_cb, 0);
 
     // get jack sample_rate
-    
+
     jack_sample_rate = jack_get_sample_rate( client );
 
     if( !sample_rate )
@@ -756,11 +750,11 @@ int main (int argc, char *argv[]) {
 
     jack_buffer_size = jack_get_buffer_size( client );
     // Setup target delay and max_diff for the normal user, who does not play with them...
-    if( !target_delay ) 
+    if( !target_delay )
 	target_delay = (num_periods*period_size / 2) + jack_buffer_size/2;
 
     if( !max_diff )
-	max_diff = num_periods*period_size - target_delay ;	
+	max_diff = num_periods*period_size - target_delay ;
 
     if( max_diff > target_delay ) {
 	    fprintf( stderr, "target_delay (%d) cant be smaller than max_diff(%d)\n", target_delay, max_diff );

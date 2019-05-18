@@ -255,12 +255,6 @@ static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams, int pe
 		printf("Unable to set avail min for capture: %s\n", snd_strerror(err));
 		return err;
 	}
-	/* align all transfers to 1 sample */
-	err = snd_pcm_sw_params_set_xfer_align(handle, swparams, 1);
-	if (err < 0) {
-		printf("Unable to set transfer align for capture: %s\n", snd_strerror(err));
-		return err;
-	}
 	/* write the parameters to the playback device */
 	err = snd_pcm_sw_params(handle, swparams);
 	if (err < 0) {
@@ -298,10 +292,10 @@ static snd_pcm_t *open_audiofd( char *device_name, int capture, int rate, int ch
   //snd_pcm_start( handle );
   //snd_pcm_wait( handle, 200 );
   int num_null_samples = nperiods * period * channels;
-  char *tmp = alloca( num_null_samples * formats[format].sample_size ); 
+  char *tmp = alloca( num_null_samples * formats[format].sample_size );
   memset( tmp, 0, num_null_samples * formats[format].sample_size );
   snd_pcm_writei( handle, tmp, num_null_samples );
-  
+
 
   return handle;
 }
@@ -336,7 +330,7 @@ int process (jack_nframes_t nframes, void *arg) {
 
 	// Set the resample_rate... we need to adjust the offset integral, to do this.
 	// first look at the PI controller, this code is just a special case, which should never execute once
-	// everything is swung in. 
+	// everything is swung in.
 	offset_integral = - (resample_mean - static_resample_factor) * catch_factor * catch_factor2;
 	// Also clear the array. we are beginning a new control cycle.
 	for( i=0; i<smooth_size; i++ )
@@ -388,7 +382,7 @@ int process (jack_nframes_t nframes, void *arg) {
     if( fabs( smooth_offset ) < pclamp )
 	    smooth_offset = 0.0;
 
-    // ok. now this is the PI controller. 
+    // ok. now this is the PI controller.
     // u(t) = K * ( e(t) + 1/T \int e(t') dt' )
     // K = 1/catch_factor and T = catch_factor2
     double current_resample_factor = static_resample_factor - smooth_offset / (double) catch_factor - offset_integral / (double) catch_factor / (double)catch_factor2;
@@ -466,7 +460,7 @@ again:
       goto again;
   }
 
-    return 0;      
+    return 0;
 }
 
 /**
@@ -695,7 +689,7 @@ int main (int argc, char *argv[]) {
 	    jack_set_latency_callback (client, latency_cb, 0);
 
     // get jack sample_rate
-    
+
     jack_sample_rate = jack_get_sample_rate( client );
 
     if( !sample_rate )
@@ -724,11 +718,11 @@ int main (int argc, char *argv[]) {
 
     jack_buffer_size = jack_get_buffer_size( client );
     // Setup target delay and max_diff for the normal user, who does not play with them...
-    if( !target_delay ) 
+    if( !target_delay )
 	target_delay = (num_periods*period_size / 2) - jack_buffer_size/2;
 
     if( !max_diff )
-	max_diff = target_delay;	
+	max_diff = target_delay;
 
     if( max_diff > target_delay ) {
 	    fprintf( stderr, "target_delay (%d) cant be smaller than max_diff(%d)\n", target_delay, max_diff );

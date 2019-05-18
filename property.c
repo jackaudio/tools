@@ -24,8 +24,8 @@ show_usage (void)
 	fprintf (stderr, "        -d, --delete		Remove/delete property \"key\" for \"UUID\"\n");
 	fprintf (stderr, "        -d, --delete UUID	Remove/delete all properties for \"UUID\"\n");
 	fprintf (stderr, "        -D, --delete-all	Remove/delete all properties\n");
-        fprintf (stderr, "        --client		Interpret UUID as a client name, not a UUID\n");
-        fprintf (stderr, "        --port		\tInterpret UUID as a port name, not a UUID\n");
+	fprintf (stderr, "        --client		Interpret UUID as a client name, not a UUID\n");
+	fprintf (stderr, "        --port		\tInterpret UUID as a port name, not a UUID\n");
 	fprintf (stderr, "\nDisplay options:\n");
 	fprintf (stderr, "        -l			Show all properties\n");
 	fprintf (stderr, "        -l, --list UUID	\tShow value all properties of UUID\n");
@@ -44,7 +44,7 @@ get_subject (jack_client_t* client, char* argv[], int* optind)
                         fprintf (stderr, "cannot get UUID for client named %s\n", cstr);
                         return -1;
                 }
-                
+
                 if (jack_uuid_parse (ustr, &uuid)) {
                         fprintf (stderr, "cannot parse client UUID as UUID\n");
                         return -1;
@@ -61,13 +61,13 @@ get_subject (jack_client_t* client, char* argv[], int* optind)
                         fprintf (stderr, "cannot find port name %s\n", pstr);
                         return -1;
                 }
-                
+
                 uuid = jack_port_uuid (port);
                 subject = pstr;
 
         } else {
                 char* str = argv[(*optind)++];
-                
+
                 if (jack_uuid_parse (str, &uuid)) {
                         fprintf (stderr, "cannot parse subject as UUID\n");
                         return -1;
@@ -81,7 +81,7 @@ get_subject (jack_client_t* client, char* argv[], int* optind)
 
 int main (int argc, char* argv[])
 {
-        jack_client_t* client = NULL;
+	jack_client_t* client = NULL;
 	jack_options_t options = JackNoStartServer;
         char* key = NULL;
         char* value = NULL;
@@ -89,7 +89,6 @@ int main (int argc, char* argv[])
         int set = 1;
         int delete = 0;
         int delete_all = 0;
-        int list_all = 0;
         int c;
 	int option_index;
 	extern int optind;
@@ -99,238 +98,237 @@ int main (int argc, char* argv[])
 		{ "delete-all", 0, 0, 'D' },
 		{ "list", 0, 0, 'l' },
 		{ "all", 0, 0, 'a' },
-                { "client", 0, 0, 'c' },
-                { "port", 0, 0, 'p' },
+		{ "client", 0, 0, 'c' },
+		{ "port", 0, 0, 'p' },
 		{ 0, 0, 0, 0 }
 	};
 
-        if (argc < 2) {
-                show_usage ();
-                exit (1);
-        }
+	if (argc < 2) {
+		show_usage ();
+		exit (1);
+	}
 
 	while ((c = getopt_long (argc, argv, "sdDlaApc", long_options, &option_index)) >= 0) {
 		switch (c) {
 		case 's':
-                        if (argc < 5) {
-                                show_usage ();
-                                exit (1);
-                        }
+			if (argc < 5) {
+				show_usage ();
+				exit (1);
+			}
 			set = 1;
 			break;
-                case 'd':
-                        if (argc < 3) {
-                                show_usage ();
-                                return 1;
-                        }
-                        set = 0;
-                        delete = 1;
-                        break;
+		case 'd':
+			if (argc < 3) {
+				show_usage ();
+				return 1;
+			}
+			set = 0;
+			delete = 1;
+			break;
 
-                case 'D':
-                        delete = 0;
-                        set = 0;
-                        delete_all = 1;
-                        break;
+		case 'D':
+			delete = 0;
+			set = 0;
+			delete_all = 1;
+			break;
 
-                case 'l':
-                        set = 0;
-                        delete = 0;
-                        delete_all = 0;
-                        break;
+		case 'l':
+			set = 0;
+			delete = 0;
+			delete_all = 0;
+			break;
 
-                case 'a':
-                        list_all = 1;
-                        set = 0;
-                        delete = 0;
-                        delete_all = 0;
-                        break;
+		case 'a':
+			set = 0;
+			delete = 0;
+			delete_all = 0;
+			break;
 
-                case 'p':
-                        subject_is_port = 1;
-                        break;
+		case 'p':
+			subject_is_port = 1;
+			break;
 
-                case 'c':
-                        subject_is_client = 1;
-                        break;
+		case 'c':
+			subject_is_client = 1;
+			break;
 
-                case '?':
-                default:
-                        show_usage ();
-                        exit (1);
-                }
-        }
+		case '?':
+		default:
+			show_usage ();
+			exit (1);
+		}
+	}
 
-        if ((client = jack_client_open ("jack-property", options, NULL)) == 0) {
-                fprintf (stderr, "Cannot connect to JACK server\n");
-                exit (1);
-        }
+	if ((client = jack_client_open ("jack-property", options, NULL)) == 0) {
+		fprintf (stderr, "Cannot connect to JACK server\n");
+		exit (1);
+	}
 
-        if (delete_all) {
+	if (delete_all) {
 
-                if (jack_remove_all_properties (client) == 0) {
-                        printf ("JACK metadata successfully delete\n");
-                        exit (0);
-                }
-                exit (1);
-        }
+		if (jack_remove_all_properties (client) == 0) {
+			printf ("JACK metadata successfully delete\n");
+			exit (0);
+			}
+		exit (1);
+	}
 
-        if (delete) {
+	if (delete) {
 
-                int args_left = argc - optind;
+		int args_left = argc - optind;
 
-                if (args_left < 1) {
-                        show_usage ();
-                        exit (1);
-                }
+		if (args_left < 1) {
+			show_usage ();
+			exit (1);
+		}
 
-                /* argc == 3: delete all properties for a subject
-                   argc == 4: delete value of key for subject
-                */
+		/* argc == 3: delete all properties for a subject
+		   argc == 4: delete value of key for subject
+		*/
 
-                if (args_left >= 2) {
-                        
-                        if (get_subject (client, argv, &optind)) {
-                                return 1;
-                        }
+		if (args_left >= 2) {
 
-                        key = argv[optind++];
+			if (get_subject (client, argv, &optind)) {
+				return 1;
+			}
 
-                        if (jack_remove_property (client, uuid, key)) {
-                                fprintf (stderr, "\"%s\" property not removed for %s\n", key, subject);
-                                exit (1);
-                        }
+		key = argv[optind++];
 
-                } else {
-                        
-                        if (get_subject (client, argv, &optind)) {
-                                return 1;
-                        }
-                        
-                        if (jack_remove_properties (client, uuid) < 0) {
-                                fprintf (stderr, "cannot remove properties for UUID %s\n", subject);
-                                exit (1);
-                        }
-                }
+		if (jack_remove_property (client, uuid, key)) {
+			fprintf (stderr, "\"%s\" property not removed for %s\n", key, subject);
+			exit (1);
+		}
 
-        }  else if (set) {
+		} else {
 
-                int args_left = argc - optind;
+			if (get_subject (client, argv, &optind)) {
+				return 1;
+			}
 
-                if (get_subject (client, argv, &optind)) {
-                        return -1;
-                }
+			if (jack_remove_properties (client, uuid) < 0) {
+				fprintf (stderr, "cannot remove properties for UUID %s\n", subject);
+				exit (1);
+				}
+		}
 
-                key = argv[optind++];
-                value = argv[optind++];
+	}  else if (set) {
 
-                if (args_left >= 3) {
-                        type = argv[optind++];
-                } else {
-                        type = "";
-                }
+		int args_left = argc - optind;
 
-                if (jack_set_property (client, uuid, key, value, type)) {
-                        fprintf (stderr, "cannot set value for key %s of %s\n", value, subject);
-                        exit (1);
-                }
-                
-        } else {
+		if (get_subject (client, argv, &optind)) {
+			return -1;
+		}
 
-                /* list properties */
-                
-                int args_left = argc - optind;
+		key = argv[optind++];
+		value = argv[optind++];
 
-                if (args_left >= 2) {
+		if (args_left >= 3) {
+			type = argv[optind++];
+		} else {
+			type = "";
+		}
 
-                        /* list properties for a UUID/key pair */
+		if (jack_set_property (client, uuid, key, value, type)) {
+			fprintf (stderr, "cannot set value for key %s of %s\n", value, subject);
+			exit (1);
+		}
 
-                        if (get_subject (client, argv, &optind)) {
-                                return -1;
-                        }
+	} else {
 
-                        key = argv[optind++];
+		/* list properties */
 
-                        if (jack_get_property (uuid, key, &value, &type) == 0) {
-                                printf ("%s\n", value);
-                                free (value);
-                                if (type) {
-                                        free (type);
-                                }
-                        } else {
-                                fprintf (stderr, "Value not found for %s of %s\n", key, subject);
-                                exit (1);
-                        }
+		int args_left = argc - optind;
 
-                } else if (args_left == 1) {
+		if (args_left >= 2) {
 
-                        /* list all properties for a given UUID */
+			/* list properties for a UUID/key pair */
 
-                        jack_description_t description;
-                        size_t cnt, n;
+			if (get_subject (client, argv, &optind)) {
+				return -1;
+			}
 
-                        if (get_subject (client, argv, &optind)) {
-                                return -1;
-                        }
-                        
-                        if ((cnt = jack_get_properties (uuid, &description)) < 0) {
-                                fprintf (stderr, "could not retrieve properties for %s\n", subject);
-                                exit (1);
-                        }
+			key = argv[optind++];
 
-                        for (n = 0; n < cnt; ++n) {
-                                if (description.properties[n].type) {
-                                        printf ("key: %s value: %s type: %s\n", 
-                                                description.properties[n].key, 
-                                                description.properties[n].data,
-                                                description.properties[n].type);
-                                } else {
-                                        printf ("key: %s value: %s\n", 
-                                                description.properties[n].key, 
-                                                description.properties[n].data);
-                                }
-                        }
+			if (jack_get_property (uuid, key, &value, &type) == 0) {
+				printf ("%s\n", value);
+				free (value);
+				if (type) {
+					free (type);
+				}
+			} else {
+				fprintf (stderr, "Value not found for %s of %s\n", key, subject);
+				exit (1);
+			}
 
-                        jack_free_description (&description, 0);
+		} else if (args_left == 1) {
 
-                } else {
+			/* list all properties for a given UUID */
 
-                        /* list all properties */
+			jack_description_t description;
+			size_t cnt, n;
 
-                        jack_description_t* description;
-                        size_t cnt;
-                        size_t p;
-                        size_t n;
-                        char buf[JACK_UUID_STRING_SIZE];
+			if (get_subject (client, argv, &optind)) {
+				return -1;
+			}
 
-                        if ((cnt = jack_get_all_properties (&description)) < 0) {
-                                fprintf (stderr, "could not retrieve properties for %s\n", subject);
-                                exit (1);
-                        }
+			if ((cnt = jack_get_properties (uuid, &description)) < 0) {
+				fprintf (stderr, "could not retrieve properties for %s\n", subject);
+				exit (1);
+			}
 
-                        for (n = 0; n < cnt; ++n) {
-                                jack_uuid_unparse (description[n].subject, buf);
-                                printf ("%s\n", buf);
-                                for (p = 0; p < description[n].property_cnt; ++p) {
-                                        if (description[n].properties[p].type) {
-                                                printf ("key: %s value: %s type: %s\n", 
-                                                        description[n].properties[p].key, 
-                                                        description[n].properties[p].data,
-                                                        description[n].properties[p].type);
-                                        } else {
-                                                printf ("key: %s value: %s\n", 
-                                                        description[n].properties[p].key, 
-                                                        description[n].properties[p].data);
-                                        }
-                                }
-                                jack_free_description (&description[n], 0);
-                        }
+			for (n = 0; n < cnt; ++n) {
+				if (description.properties[n].type) {
+					printf ("key: %s value: %s type: %s\n",
+								description.properties[n].key,
+								description.properties[n].data,
+								description.properties[n].type);
+				} else {
+					printf ("key: %s value: %s\n",
+								description.properties[n].key,
+								description.properties[n].data);
+				}
+			}
 
-                        free (description);
-                }
-        }
+			jack_free_description (&description, 0);
+
+		} else {
+
+			/* list all properties */
+
+			jack_description_t* description;
+			size_t cnt;
+			size_t p;
+			size_t n;
+			char buf[JACK_UUID_STRING_SIZE];
+
+			if ((cnt = jack_get_all_properties (&description)) < 0) {
+				fprintf (stderr, "could not retrieve properties for %s\n", subject);
+				exit (1);
+			}
+
+			for (n = 0; n < cnt; ++n) {
+				jack_uuid_unparse (description[n].subject, buf);
+				printf ("%s\n", buf);
+				for (p = 0; p < description[n].property_cnt; ++p) {
+					if (description[n].properties[p].type) {
+						printf ("key: %s value: %s type: %s\n",
+								description[n].properties[p].key,
+								description[n].properties[p].data,
+								description[n].properties[p].type);
+					} else {
+						printf ("key: %s value: %s\n",
+								description[n].properties[p].key,
+								description[n].properties[p].data);
+					}
+				}
+				jack_free_description (&description[n], 0);
+			}
+
+			free (description);
+		}
+	}
 
 
-        (void) jack_client_close (client);
-        return 0;
+	(void) jack_client_close (client);
+	return 0;
 }
