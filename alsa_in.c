@@ -176,7 +176,7 @@ static int set_hwparams(snd_pcm_t *handle, snd_pcm_hw_params_t *params, snd_pcm_
 		return err;
 	}
 	if (rchannels != channels) {
-		printf("WARNING: chennel count does not match (requested %d got %d)\n", channels, rchannels);
+		printf("WARNING: channels count does not match (requested %d got %d)\n", channels, rchannels);
 		num_channels = rchannels;
 	}
 	/* set the stream rate */
@@ -247,7 +247,7 @@ static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams, int pe
 	}
 	err = snd_pcm_sw_params_set_stop_threshold(handle, swparams, -1 );
 	if (err < 0) {
-		printf("Unable to set start threshold mode for capture: %s\n", snd_strerror(err));
+		printf("Unable to set stop threshold mode for capture: %s\n", snd_strerror(err));
 		return err;
 	}
 	/* allow the transfer when at least period_size samples can be processed */
@@ -391,7 +391,7 @@ int process (jack_nframes_t nframes, void *arg) {
     offset_array[(offset_differential_index++)% smooth_size ] = offset;
 
     // Build the mean of the windowed offset array
-    // basically fir lowpassing.
+    // basically for lowpassing.
     double smooth_offset = 0.0;
     for( i=0; i<smooth_size; i++ )
 	    smooth_offset +=
@@ -416,7 +416,7 @@ int process (jack_nframes_t nframes, void *arg) {
     // now quantize this value around resample_mean, so that the noise which is in the integral component doesnt hurt.
     current_resample_factor = floor( (current_resample_factor - resample_mean) * controlquant + 0.5 ) / controlquant + resample_mean;
 
-    // Output "instrumentatio" gonna change that to real instrumentation in a few.
+    // Output "instrumentation" gonna change that to real instrumentation in a few.
     output_resampling_factor = (float) current_resample_factor;
     output_diff = (float) smooth_offset;
     output_integral = (float) offset_integral;
@@ -426,7 +426,7 @@ int process (jack_nframes_t nframes, void *arg) {
     if( current_resample_factor < resample_lower_limit ) current_resample_factor = resample_lower_limit;
     if( current_resample_factor > resample_upper_limit ) current_resample_factor = resample_upper_limit;
 
-    // Now Calculate how many samples we need.
+    // Now calculate how many samples we need.
     rlen = ceil( ((double)nframes) / current_resample_factor )+2;
     assert( rlen > 2 );
 
