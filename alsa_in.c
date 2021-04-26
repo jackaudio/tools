@@ -21,6 +21,8 @@
 
 #include <samplerate.h>
 
+#define XRUN_ABORT_COUNT 5
+
 // Here are the lists of the jack ports...
 
 JSList	   *capture_ports = NULL;
@@ -434,15 +436,17 @@ int process (jack_nframes_t nframes, void *arg) {
     resample_mean = 0.9999 * resample_mean + 0.0001 * current_resample_factor;
 
     // get the data...
+    int loop_count = 0;
 again:
     err = snd_pcm_readi(alsa_handle, outbuf, rlen);
     if( err < 0 ) {
-	printf( "err = %d\n", err );
-	if (xrun_recovery(alsa_handle, err) < 0) {
-	    //printf("Write error: %s\n", snd_strerror(err));
-	    //exit(EXIT_FAILURE);
-	}
-	goto again;
+        printf( "err = %d\n", err );
+        if (xrun_recovery(alsa_handle, err) < 0 && loop_count > XRUN_ABORT_COUNT) {
+            printf("Write error: %s\n", snd_strerror(err));
+            exit(EXIT_FAILURE);
+        }
+        loop_count++;
+        goto again;
     }
     if( err != rlen ) {
 	//printf( "read = %d\n", rlen );
