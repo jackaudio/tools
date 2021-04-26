@@ -439,8 +439,8 @@ again:
     if( err < 0 ) {
 	printf( "err = %d\n", err );
 	if (xrun_recovery(alsa_handle, err) < 0) {
-	    //printf("Write error: %s\n", snd_strerror(err));
-	    //exit(EXIT_FAILURE);
+	    printf("Write error: %s\n", snd_strerror(err));
+	    exit(EXIT_FAILURE);
 	}
 	goto again;
     }
